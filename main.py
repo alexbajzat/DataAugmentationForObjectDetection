@@ -25,21 +25,25 @@ def run():
     print("working directory: ", folder)
     print("number of replications: ", replication_factor)
 
+    target_folder = folder + "/" + AUGMENTATION_FOLDER
+    if not isdir(target_folder):
+        mkdir(target_folder)
+
+    print("Target folder: ", target_folder)
+
     for voc_file in listdir(folder):
         path = folder + "/" + voc_file
-        print("voc file: ", path)
-
-        target_folder = folder + "/" + AUGMENTATION_FOLDER
-        if not isdir(target_folder):
-            mkdir(target_folder)
 
         if isfile(path):
-            voc_tree = ET.parse(folder + '/' + voc_file)
-            voc_obj = voc_tree.getroot()
-            boxes = parse_boxes(voc_obj)
-            image = load_image(voc_obj.find('path').text)
-            augmented = do_augmentation(image, boxes, replication_factor)
-            persist_augmented(augmented, target_folder, voc_tree)
+            if ".xml" in path:
+                print("voc file: ", path)
+
+                voc_tree = ET.parse(folder + '/' + voc_file)
+                voc_obj = voc_tree.getroot()
+                boxes = parse_boxes(voc_obj)
+                image = load_image(voc_obj.find('path').text)
+                augmented = do_augmentation(image, boxes, replication_factor)
+                persist_augmented(augmented, target_folder, voc_tree)
 
 
 def do_augmentation(image, boxes, replication_factor=1):
