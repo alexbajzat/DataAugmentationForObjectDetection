@@ -16,32 +16,35 @@ AUGMENTATION_FOLDER = "AUG_GENERATED"
 
 
 def run():
-    if len(sys.argv) <= 2:
+    if len(sys.argv) <= 3:
         print("Missing arguments")
         exit(1)
 
-    folder = sys.argv[1]
-    replication_factor = int(sys.argv[2])
-    print("working directory: ", folder)
+    voc_folder = sys.argv[1]
+    image_folder = sys.argv[2]
+    replication_factor = int(sys.argv[3])
+
+    print("working voc directory: ", voc_folder)
+    print("working images directory: ", voc_folder)
     print("number of replications: ", replication_factor)
 
-    target_folder = folder + "/" + AUGMENTATION_FOLDER
+    target_folder = voc_folder + "/" + AUGMENTATION_FOLDER
     if not isdir(target_folder):
         mkdir(target_folder)
 
     print("Target folder: ", target_folder)
 
-    for voc_file in listdir(folder):
-        path = folder + "/" + voc_file
+    for voc_file in listdir(voc_folder):
+        path = voc_folder + "/" + voc_file
 
         if isfile(path):
             if ".xml" in path:
                 print("voc file: ", path)
 
-                voc_tree = ET.parse(folder + '/' + voc_file)
+                voc_tree = ET.parse(voc_folder + '/' + voc_file)
                 voc_obj = voc_tree.getroot()
                 boxes = parse_boxes(voc_obj)
-                image = load_image(voc_obj.find('path').text)
+                image = load_image(image_folder + "/" + voc_obj.find('filename').text)
                 augmented = do_augmentation(image, boxes, replication_factor)
                 persist_augmented(augmented, target_folder, voc_tree)
 
@@ -71,6 +74,7 @@ def persist_augmented(augmented, target_folder, voc_tree):
         target_name = str(uuid.uuid4())
         image_name = target_name + ".jpg"
         voc_root.find('path').text = "images/" + image_name
+        voc_root.find('filename').text = image_name
         persist_image(img, image_name, target_folder)
         update_boxes(voc_root, boxes)
         persist_augmented_voc(voc_tree, target_folder, target_name)
