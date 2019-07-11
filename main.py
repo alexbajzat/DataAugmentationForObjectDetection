@@ -70,7 +70,7 @@ def persist_augmented(augmented, target_folder, voc_tree):
     for img, boxes in augmented:
         target_name = str(uuid.uuid4())
         image_name = target_name + ".jpg"
-        voc_root.find('path').text = target_folder + "/" + image_name
+        voc_root.find('path').text = "images/" + image_name
         persist_image(img, image_name, target_folder)
         update_boxes(voc_root, boxes)
         persist_augmented_voc(voc_tree, target_folder, target_name)
